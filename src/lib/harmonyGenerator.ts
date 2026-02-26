@@ -740,7 +740,11 @@ export async function generateHarmonies(
   }
 
   // Step 4-5: Synthesize each part
-  const sampleRate = sourceBuffer.sampleRate;
+  // Use 22050Hz for synthesis — the synthesized tones only contain content
+  // up to ~3.5kHz (highest harmonic of alto at F5 with 5x ratio), so 22050Hz
+  // (Nyquist = 11025Hz) gives plenty of headroom while keeping file sizes
+  // well within the 15MB MongoDB document storage limit.
+  const sampleRate = 22050;
   const totalDuration = sourceBuffer.duration;
 
   const parts: Array<{ key: "alto" | "tenor" | "bass"; name: string; volume: number }> = [
