@@ -193,10 +193,16 @@ export function DAWEditor({ project, initialTracks }: DAWEditorProps) {
       "audio/ogg",
       "audio/flac",
       "audio/webm",
+      "application/octet-stream", // Some browsers/OS report this for audio files
     ];
 
+    const allowedExtensions = [".wav", ".mp3", ".ogg", ".flac", ".webm", ".m4a", ".aac"];
+
     for (const file of Array.from(files)) {
-      if (!allowedTypes.includes(file.type)) {
+      const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+      const typeOk = allowedTypes.includes(file.type) || allowedExtensions.includes(ext);
+
+      if (!typeOk) {
         toast.error(`Unsupported format: ${file.name}`);
         continue;
       }
