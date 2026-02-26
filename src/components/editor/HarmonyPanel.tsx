@@ -7,8 +7,6 @@ import {
   ChevronUp,
   Loader2,
   CheckCircle2,
-  Music,
-  Headphones,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,15 +32,11 @@ const HARMONY_STEPS = [
   "Done!",
 ];
 
-/** Colors matching TrackLane harmony part colors */
-const PART_COLORS: Record<string, string> = {
-  soprano: "text-blue-400",
-  alto: "text-green-400",
-  tenor: "text-orange-400",
-  bass: "text-red-400",
-};
+interface HarmonyPanelProps {
+  onHarmoniesGenerated?: () => void;
+}
 
-export function HarmonyPanel() {
+export function HarmonyPanel({ onHarmoniesGenerated }: HarmonyPanelProps) {
   const {
     tracks,
     project,
@@ -50,6 +44,7 @@ export function HarmonyPanel() {
     harmonyProgress,
     setGeneratingHarmonies,
     setHarmonyProgress,
+    setHarmonySopranoTrackId,
     addTrack,
   } = useEditorStore();
 
@@ -69,32 +64,6 @@ export function HarmonyPanel() {
   const harmonyTracks = tracks.filter((t) => t.type === "harmony");
   const hasHarmonies = harmonyTracks.length > 0;
 
-  /** Solo a specific harmony part so the user can learn it */
-  function practicePartSolo(partName: string) {
-    const engine = getAudioEngine();
-    // Un-solo everything first
-    for (const t of tracks) {
-      engine.soloTrack(t._id, false);
-    }
-    // Solo just this part
-    const partTrack = harmonyTracks.find(
-      (t) => t.harmonyPart === partName
-    );
-    if (partTrack) {
-      engine.soloTrack(partTrack._id, true);
-      toast.success(`Practicing ${partName} part — solo enabled`);
-    }
-  }
-
-  /** Play all parts together */
-  function practiceAllParts() {
-    const engine = getAudioEngine();
-    for (const t of tracks) {
-      engine.soloTrack(t._id, false);
-    }
-    toast.success("All parts playing together");
-  }
-
   async function handleGenerate() {
     if (!selectedTrackId || !project?._id) {
       toast.error("Please select a vocal track");
@@ -105,6 +74,7 @@ export function HarmonyPanel() {
     if (!sourceTrack) return;
 
     setGeneratingHarmonies(true);
+    setHarmonySopranoTrackId(selectedTrackId);
     setCurrentStep(0);
 
     try {
@@ -159,7 +129,8 @@ export function HarmonyPanel() {
       }
 
       setCurrentStep(HARMONY_STEPS.length - 1);
-      toast.success("Harmonies generated! Use the practice buttons to learn each part.");
+      toast.success("Harmonies generated! Open the Harmony modal to practice each part.");
+      onHarmoniesGenerated?.();
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -267,58 +238,6 @@ export function HarmonyPanel() {
                     {step}
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Practice Mode — shown when harmonies exist */}
-          {hasHarmonies && !isGeneratingHarmonies && (
-            <div className="space-y-2 pt-2 border-t border-border">
-              <div className="flex items-center gap-2">
-                <Headphones className="h-4 w-4 text-primary" />
-                <span className="text-xs font-semibold">Practice Mode</span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Solo a part to hear it alone and learn your line:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {(["soprano", "alto", "tenor", "bass"] as const).map((part) => {
-                  const exists =
-                    part === "soprano"
-                      ? vocalTracks.length > 0
-                      : harmonyTracks.some((t) => t.harmonyPart === part);
-                  if (!exists) return null;
-                  return (
-                    <Button
-                      key={part}
-                      variant="outline"
-                      size="sm"
-                      className={`text-xs ${PART_COLORS[part]}`}
-                      onClick={() => {
-                        if (part === "soprano") {
-                          // Solo the original vocal track
-                          const engine = getAudioEngine();
-                          for (const t of tracks) engine.soloTrack(t._id, false);
-                          if (selectedTrackId) engine.soloTrack(selectedTrackId, true);
-                          toast.success("Practicing soprano (melody) — solo enabled");
-                        } else {
-                          practicePartSolo(part);
-                        }
-                      }}
-                    >
-                      <Music className="h-3 w-3 mr-1" />
-                      {part.charAt(0).toUpperCase() + part.slice(1)}
-                    </Button>
-                  );
-                })}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  onClick={practiceAllParts}
-                >
-                  All Parts
-                </Button>
               </div>
             </div>
           )}

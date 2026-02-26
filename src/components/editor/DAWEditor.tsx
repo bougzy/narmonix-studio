@@ -15,7 +15,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Upload, Sliders, Download, Music, FileText } from "lucide-react";
+import { Upload, Sliders, Download, Music, FileText, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEditorStore } from "@/store/useEditorStore";
@@ -29,6 +29,7 @@ import { HarmonyPanel } from "./HarmonyPanel";
 import { EditingToolbar } from "./EditingToolbar";
 import { ExportModal } from "./ExportModal";
 import { SolfaNotationModal } from "./SolfaNotationModal";
+import { HarmonyModal } from "./HarmonyModal";
 import { toast } from "sonner";
 import { IProject, ITrack } from "@/types";
 
@@ -54,6 +55,7 @@ export function DAWEditor({ project, initialTracks }: DAWEditorProps) {
   const [showRecorder, setShowRecorder] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showSolfa, setShowSolfa] = useState(false);
+  const [showHarmony, setShowHarmony] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -348,6 +350,16 @@ export function DAWEditor({ project, initialTracks }: DAWEditorProps) {
           <FileText className="h-3 w-3 mr-1" />
           Solfa Sheet
         </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowHarmony(true)}
+          disabled={tracks.filter((t) => t.type === "harmony").length === 0}
+        >
+          <Headphones className="h-3 w-3 mr-1" />
+          Harmonies
+        </Button>
       </div>
 
       {/* Editing Toolbar */}
@@ -422,7 +434,7 @@ export function DAWEditor({ project, initialTracks }: DAWEditorProps) {
           </ScrollArea>
 
           {/* Harmony Panel */}
-          <HarmonyPanel />
+          <HarmonyPanel onHarmoniesGenerated={() => setShowHarmony(true)} />
         </div>
 
         {/* Mixer Panel */}
@@ -437,6 +449,7 @@ export function DAWEditor({ project, initialTracks }: DAWEditorProps) {
       />
       <ExportModal open={showExport} onOpenChange={setShowExport} />
       <SolfaNotationModal open={showSolfa} onOpenChange={setShowSolfa} />
+      <HarmonyModal open={showHarmony} onOpenChange={setShowHarmony} />
     </div>
   );
 }

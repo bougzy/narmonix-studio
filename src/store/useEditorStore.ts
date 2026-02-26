@@ -11,6 +11,7 @@ interface EditorState {
   selectedTrackId: string | null;
   isGeneratingHarmonies: boolean;
   harmonyProgress: string;
+  harmonySopranoTrackId: string | null;
   zoom: number;
   loopEnabled: boolean;
   editMode: "select" | "trim" | "cut" | "split" | "fade-in" | "fade-out" | null;
@@ -32,6 +33,7 @@ interface EditorActions {
   setSelectedTrack: (trackId: string | null) => void;
   setGeneratingHarmonies: (generating: boolean) => void;
   setHarmonyProgress: (progress: string) => void;
+  setHarmonySopranoTrackId: (id: string | null) => void;
   setZoom: (zoom: number) => void;
   setLoopEnabled: (enabled: boolean) => void;
   setEditMode: (mode: EditorState["editMode"]) => void;
@@ -53,6 +55,7 @@ const initialState: EditorState = {
   selectedTrackId: null,
   isGeneratingHarmonies: false,
   harmonyProgress: "",
+  harmonySopranoTrackId: null,
   zoom: 1,
   loopEnabled: false,
   editMode: null,
@@ -99,6 +102,8 @@ export const useEditorStore = create<EditorState & EditorActions>((set, get) => 
   setGeneratingHarmonies: (isGeneratingHarmonies) =>
     set({ isGeneratingHarmonies }),
   setHarmonyProgress: (harmonyProgress) => set({ harmonyProgress }),
+  setHarmonySopranoTrackId: (harmonySopranoTrackId) =>
+    set({ harmonySopranoTrackId }),
   setZoom: (zoom) => set({ zoom: Math.max(0.1, Math.min(10, zoom)) }),
   setLoopEnabled: (loopEnabled) => set({ loopEnabled }),
   setEditMode: (editMode) => set({ editMode }),
